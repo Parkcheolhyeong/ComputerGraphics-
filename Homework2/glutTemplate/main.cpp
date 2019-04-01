@@ -3,14 +3,15 @@
 #define CHEIGHT 600.f
 #define CWIDTH 800.f
 
-int winID;
+int winID;	// Windows Name
+static bool cvt_val = true;	// Once Print Values of Converting
 
 /* Structure Type of Point */
 typedef struct Point {
 	int x, y;
 } Point;
 
-/* Structure Type of Line */
+/* Structure Type of Line(Prepare) */
 typedef struct Line {
 	int p0, p1;
 } Line;
@@ -88,10 +89,16 @@ void render(void)
 	// Convert from Camerat to View
 	for (i = 1; i < 10; i++)
 	{
+		if (cvt_val == true) {
+			printf("P_c[%4d](%4d, %4d) -> ", i, points[i].x, points[i].y);
+		}
 		points[i] = CameraToViewport(points[i]);
-		printf("%d = %d, %d\n", i, points[i].x, points[i].y);
+		if (cvt_val == true) {
+			printf("P_v[%4d](%4d, %4d)\n", i, points[i].x, points[i].y);
+		}
 	}
-	
+
+	cvt_val = false; // Lock Printf
 	// Draw figure
 	DrawLine(points[1], points[2], b);
 	DrawLine(points[2], points[3], b);
@@ -112,6 +119,7 @@ void render(void)
 void init(void)
 {
 	FrameBuffer::Init(WIDTH, HEIGHT);
+	printf("Goal: Camera(%d X %d) -> View (%d X %d)\n\n\n", (int)CWIDTH, (int)CHEIGHT, (int)WIDTH, (int)HEIGHT);
 
 	//Initialize everything here
 }
