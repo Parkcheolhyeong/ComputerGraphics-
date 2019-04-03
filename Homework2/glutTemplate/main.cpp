@@ -46,12 +46,12 @@ void DrawLine(Point p1, Point p2, Color c) {
 	{
 		if (p1.x < p2.x)
 		{
-			//p1부터 그린다.
+			// p1 to p2
 			for (int i = p1.x; i < p2.x; i++)
 				FrameBuffer::SetPixel(i, p1.y, c.r, c.g, c.b);
 		}
 		else {
-			//p2부터 그린다.
+			// p2 to p1
 			for (int i = p2.x; i < p1.x; i++)
 				FrameBuffer::SetPixel(i, p2.y, c.r, c.g, c.b);
 		}
@@ -60,12 +60,12 @@ void DrawLine(Point p1, Point p2, Color c) {
 	else if (p1.x - p2.x == 0) {
 		if (p1.y < p2.y)
 		{
-			//p1부터 그린다.
+			// p1 to p2
 			for (int i = p1.y; i < p2.y; i++)
 				FrameBuffer::SetPixel(p1.x, i, c.r, c.g, c.b);
 		}
 		else {
-			//p2부터 그린다.
+			// p2 to p1
 			for (int i = p2.y; i < p1.y; i++)
 				FrameBuffer::SetPixel(p2.x, i, c.r, c.g, c.b);
 		}
