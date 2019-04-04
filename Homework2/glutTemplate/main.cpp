@@ -33,12 +33,6 @@ Point CameraToViewport(const Point &p)
 	return vPoint;
 }
 
-void DrawHLine(Point p1, Point p2, Color c)
-{
-
-}
-
-
 /* Draw to Line (Method of Normalized Vector, etc) */
 void DrawLine(Point p1, Point p2, Color c) {
 	/* Draw to Line (Horizon) */
