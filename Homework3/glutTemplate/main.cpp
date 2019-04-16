@@ -114,7 +114,7 @@ Matrix matmatMul(const Matrix &m1, const Matrix &m2)
 
 
 
-/* Convert from Camera To View*/
+/* Convert from Model To View*/
 Point ModelToViewport(const Point &p)
 {
 	Point vPoint;
@@ -124,7 +124,8 @@ Point ModelToViewport(const Point &p)
 	return vPoint;
 }
 
-/* Draw to Line (Method of Normalized Vector, etc) */
+/* Draw to Line (Vertical, Horizon, Gradient */
+
 void DrawVLine(Point p1, Point p2, Color c)
 {
 	if (p1.y - p2.y == 0)
@@ -158,48 +159,53 @@ void DrawHLine(Point p1, Point p2, Color c)
 		}
 	}
 }
-void DrawLine(Point p1, Point p2, Color c) {
-	if (p1.y - p2.y == 0) {
-		DrawVLine(p1, p2, c);
-		return;
-	}
 
-	if (p1.x - p2.x == 0) {
-		DrawHLine(p1, p2, c);
-		return;
-	}
+/* DDA Draw Algorithm */
+void DrawLine(Point p1, Point p2, Color c) {
+
 
 	int x0 = p1.x, x1 = p2.x;
 	int y0 = p1.y, y1 = p2.y;
 	int x, y;
 	float _x, _y;
 
-	float dx = x1 - x0;
-	float dy = y1 - y0;
-	float m = (float)dy / (float)dx;
+	float dx = x1 - x0; // distance x
+	float dy = y1 - y0; // distance y
+	float m = (float)dy / (float)dx; // gradient
 
-	if (m >= -1 && m <= 1) {
-		if (dx < 0) {// 좌표값을 위로 올리는 swap
+
+	if (dy == 0) { // Vertical
+		DrawVLine(p1, p2, c);
+		return;
+	}
+
+	if (dx == 0) { // Horizon
+		DrawHLine(p1, p2, c);
+		return;
+	}
+
+	if (m >= -1 && m <= 1) { // Gradient
+		if (dx < 0) { // Up & Swap
 			int temp = x0;
-			x0 = x1;
-			x1 = temp;
+			x0 = x1; x1 = temp;
 			temp = y0;
-			y0 = y1;
-			y1 = temp;
+			y0 = y1; y1 = temp;
 			dx = -1;
 			dy = -1;
 		}
+		/*swap*/
 		x = x0;
 		y = y0;
+
+		/* Init round(_x, _y)*/
 		_x = x0;
-		_y = y0;	//초기화_x,_y는 
-			//최종적으로 ROUND 값이 들어간다.
+		_y = y0;
+
 		while (x < x1) {
-			x++; // x가 1씩 증가하며 y값을 구한다.
+			x++; // Calc y
 			_y = (_y + (float)m);
-			y = (int)(_y + 0.5);
-			// y값은 _y가 증가를 하며 
-			// ROUND된 값을 대입을한다.
+			y = (int)(_y + 0.5); // round Calc
+
 			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
@@ -219,16 +225,15 @@ void DrawLine(Point p1, Point p2, Color c) {
 		_x = x0;
 		_y = y0;
 		while (y < y1) {
-			y++;
+			y++; //Calc x
 			_x = (float)(_x + 1 / m);
-			x = (int)(_x + 0.5);
+			x = (int)(_x + 0.5); // round Calc
 			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
 
 
 }
-
 /* Set keyboard setting */
 void keyboard(unsigned char key, int x, int y)
 {

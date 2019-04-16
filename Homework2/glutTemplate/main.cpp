@@ -68,6 +68,8 @@ void DrawHLine(Point p1, Point p2, Color c)
 		}
 	}
 }
+
+/* DDA Draw Algorithm */
 void DrawLine(Point p1, Point p2, Color c) {
 
 
@@ -109,11 +111,10 @@ void DrawLine(Point p1, Point p2, Color c) {
 		_y = y0;	
 
 		while (x < x1) {
-			x++; // Calc y from x
+			x++; // Calc y
 			_y = (_y + (float)m);
-			y = (int)(_y + 0.5);
-			// y값은 _y가 증가를 하며 
-			// ROUND된 값을 대입을한다.
+			y = (int)(_y + 0.5); // round Calc
+			
 			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
@@ -133,9 +134,9 @@ void DrawLine(Point p1, Point p2, Color c) {
 		_x = x0;
 		_y = y0;
 		while (y < y1) {
-			y++;
+			y++; //Calc x
 			_x = (float)(_x + 1 / m);
-			x = (int)(_x + 0.5);
+			x = (int)(_x + 0.5); // round Calc
 			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
