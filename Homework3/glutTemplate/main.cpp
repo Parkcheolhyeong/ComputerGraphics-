@@ -162,7 +162,7 @@ void DrawLine(Point p1, Point p2, Color c) {
 		float UVectory = (p1.y - p2.y) / vectorSize;		// Unit vector y
 
 		for (int i = 0; i < vectorSize; i++) {
-			FrameBuffer::SetPixel(p2.x + (i*UVectorx), p2.y + (i*UVectory), c.r, c.g, c.b);
+			FrameBuffer::SetPixel(round(p2.x + (i*UVectorx)), round(p2.y + (i*UVectory)), c.r, c.g, c.b); // Round from float to integer
 		}
 	}
 }
