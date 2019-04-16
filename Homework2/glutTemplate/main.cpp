@@ -33,9 +33,10 @@ Point CameraToViewport(const Point &p)
 	return vPoint;
 }
 
-/* Draw to Line (Method of Normalized Vector, etc) */
-void DrawLine(Point p1, Point p2, Color c) {
-	/* Draw to Line (Horizon) */
+/* Draw to Line (Vertical, Horizon, Gradient */
+
+void DrawVLine(Point p1, Point p2, Color c)
+{
 	if (p1.y - p2.y == 0)
 	{
 		if (p1.x < p2.x)
@@ -50,8 +51,10 @@ void DrawLine(Point p1, Point p2, Color c) {
 				FrameBuffer::SetPixel(i, p2.y, c.r, c.g, c.b);
 		}
 	}
-	/* Draw to Line (Vertical) */
-	else if (p1.x - p2.x == 0) {
+}
+void DrawHLine(Point p1, Point p2, Color c)
+{
+	if (p1.x - p2.x == 0) {
 		if (p1.y < p2.y)
 		{
 			// p1 to p2
@@ -63,16 +66,81 @@ void DrawLine(Point p1, Point p2, Color c) {
 			for (int i = p2.y; i < p1.y; i++)
 				FrameBuffer::SetPixel(p2.x, i, c.r, c.g, c.b);
 		}
-	} else { 	// Draw to Line (Normalized vector)
-		float vectorSize = sqrt(pow(p1.y - p2.y, 2) + pow(p1.x - p2.x, 2));		// Distance of point to point
+	}
+}
+void DrawLine(Point p1, Point p2, Color c) {
 
-		float UVectorx = (p1.x - p2.x) / vectorSize;		// Unit vector x
-		float UVectory = (p1.y - p2.y) / vectorSize;		// Unit vector y
 
-		for (int i = 0; i < vectorSize; i++) {
-			FrameBuffer::SetPixel(p2.x + (i*UVectorx), p2.y + (i*UVectory), c.r, c.g, c.b);
+	int x0 = p1.x, x1 = p2.x;  
+	int y0 = p1.y, y1 = p2.y;
+	int x, y;
+	float _x, _y;
+
+	float dx = x1 - x0; // distance x
+	float dy = y1 - y0; // distance y
+	float m = (float)dy / (float)dx; // gradient
+
+
+	if (dy == 0) { // Vertical
+		DrawVLine(p1, p2, c);
+		return;
+	}
+
+	if (dx == 0) { // Horizon
+		DrawHLine(p1, p2, c);
+		return;
+	}
+
+	if (m >= -1 && m <= 1) { // Gradient
+		if (dx < 0) { // Up & Swap
+			int temp = x0;
+			x0 = x1; x1 = temp;
+			temp = y0;
+			y0 = y1; y1 = temp;
+			dx = -1;
+			dy = -1;
+		}
+		/*swap*/
+		x = x0;
+		y = y0;
+
+		/* Init round(_x, _y)*/
+		_x = x0;
+		_y = y0;	
+
+		while (x < x1) {
+			x++; // Calc y from x
+			_y = (_y + (float)m);
+			y = (int)(_y + 0.5);
+			// y값은 _y가 증가를 하며 
+			// ROUND된 값을 대입을한다.
+			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
+	else {
+		if (dy < 0) {
+			int temp = x0;
+			x0 = x1;
+			x1 = temp;
+			temp = y0;
+			y0 = y1;
+			y1 = temp;
+			dx = -1;
+			dy = -1;
+		}
+		x = x0;
+		y = y0;
+		_x = x0;
+		_y = y0;
+		while (y < y1) {
+			y++;
+			_x = (float)(_x + 1 / m);
+			x = (int)(_x + 0.5);
+			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
+		}
+	}
+
+
 }
 
 void keyboard(unsigned char key, int x, int y)

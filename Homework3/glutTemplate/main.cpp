@@ -125,8 +125,8 @@ Point ModelToViewport(const Point &p)
 }
 
 /* Draw to Line (Method of Normalized Vector, etc) */
-void DrawLine(Point p1, Point p2, Color c) {
-	/* Draw to Line (Horizon) */
+void DrawVLine(Point p1, Point p2, Color c)
+{
 	if (p1.y - p2.y == 0)
 	{
 		if (p1.x < p2.x)
@@ -141,8 +141,10 @@ void DrawLine(Point p1, Point p2, Color c) {
 				FrameBuffer::SetPixel(i, p2.y, c.r, c.g, c.b);
 		}
 	}
-	/* Draw to Line (Vertical) */
-	else if (p1.x - p2.x == 0) {
+}
+void DrawHLine(Point p1, Point p2, Color c)
+{
+	if (p1.x - p2.x == 0) {
 		if (p1.y < p2.y)
 		{
 			// p1 to p2
@@ -155,16 +157,76 @@ void DrawLine(Point p1, Point p2, Color c) {
 				FrameBuffer::SetPixel(p2.x, i, c.r, c.g, c.b);
 		}
 	}
-	else { 	// Draw to Line (Normalized vector)
-		float vectorSize = sqrt(pow(p1.y - p2.y, 2) + pow(p1.x - p2.x, 2));		// Distance of point to point
+}
+void DrawLine(Point p1, Point p2, Color c) {
+	if (p1.y - p2.y == 0) {
+		DrawVLine(p1, p2, c);
+		return;
+	}
 
-		float UVectorx = (p1.x - p2.x) / vectorSize;		// Unit vector x
-		float UVectory = (p1.y - p2.y) / vectorSize;		// Unit vector y
+	if (p1.x - p2.x == 0) {
+		DrawHLine(p1, p2, c);
+		return;
+	}
 
-		for (int i = 0; i < vectorSize; i++) {
-			FrameBuffer::SetPixel(round(p2.x + (i*UVectorx)), round(p2.y + (i*UVectory)), c.r, c.g, c.b); // Round from float to integer
+	int x0 = p1.x, x1 = p2.x;
+	int y0 = p1.y, y1 = p2.y;
+	int x, y;
+	float _x, _y;
+
+	float dx = x1 - x0;
+	float dy = y1 - y0;
+	float m = (float)dy / (float)dx;
+
+	if (m >= -1 && m <= 1) {
+		if (dx < 0) {// 좌표값을 위로 올리는 swap
+			int temp = x0;
+			x0 = x1;
+			x1 = temp;
+			temp = y0;
+			y0 = y1;
+			y1 = temp;
+			dx = -1;
+			dy = -1;
+		}
+		x = x0;
+		y = y0;
+		_x = x0;
+		_y = y0;	//초기화_x,_y는 
+			//최종적으로 ROUND 값이 들어간다.
+		while (x < x1) {
+			x++; // x가 1씩 증가하며 y값을 구한다.
+			_y = (_y + (float)m);
+			y = (int)(_y + 0.5);
+			// y값은 _y가 증가를 하며 
+			// ROUND된 값을 대입을한다.
+			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
 		}
 	}
+	else {
+		if (dy < 0) {
+			int temp = x0;
+			x0 = x1;
+			x1 = temp;
+			temp = y0;
+			y0 = y1;
+			y1 = temp;
+			dx = -1;
+			dy = -1;
+		}
+		x = x0;
+		y = y0;
+		_x = x0;
+		_y = y0;
+		while (y < y1) {
+			y++;
+			_x = (float)(_x + 1 / m);
+			x = (int)(_x + 0.5);
+			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
+		}
+	}
+
+
 }
 
 /* Set keyboard setting */
