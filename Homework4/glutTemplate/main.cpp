@@ -115,7 +115,7 @@ Matrix matmatMul(const Matrix &m1, const Matrix &m2)
 	return result;
 }
 
-
+/* Init Camera matrix */
 Matrix Camera(const Vector &u, Vector &v)
 {
 	Matrix m;
@@ -124,7 +124,7 @@ Matrix Camera(const Vector &u, Vector &v)
 	if (curCam == 1) nPos = pos1;		//카메라에 맞는 좌표 넣음
 	else nPos = pos2;
 
-	// Fill this part
+	// Inner Product
 	m.m[0][0] = u.x;	m.m[0][1] = u.y;	m.m[0][2] = (-nPos.x * u.x) + (-nPos.y * u.y);
 	m.m[1][0] = v.x;	m.m[1][1] = v.y;	m.m[1][2] = (-nPos.x * v.x) + (-nPos.y * v.y);
 	m.m[2][0] = 0;		m.m[2][1] = 0;		m.m[2][2] = 1;
@@ -132,7 +132,7 @@ Matrix Camera(const Vector &u, Vector &v)
 }
 
 /* Convert from Model To View*/
-Point ModelToViewport(const Point &p)
+Point WindowsToViewport(const Point &p)
 {
 	Point vPoint;
 	float CWIDTH, CHEIGHT;
@@ -282,12 +282,12 @@ void keyboard(unsigned char key, int x, int y)
 		pos2.x += SPEED;
 		break;
 	case 'q':
-		cameraportWidth2 *= 2, cameraportHeight2 *= 2;
+		cameraportWidth2 *= 2.f, cameraportHeight2 *= 2.f; // enlarge
 		break;
 	case 'e':
-		cameraportWidth2 /= 2, cameraportHeight2 /= 2;
+		cameraportWidth2 /= 2.f, cameraportHeight2 /= 2.f; // reduce
 		break;
-	case VK_SPACE:
+	case VK_SPACE:	// Change cameraport
 		if (curCam == 1) { curCam = 0; }
 		else { curCam = 1; }
 		break;
@@ -323,7 +323,6 @@ void render(void)
 	// Put your rendering code here
 
 
-	// object1_cross
 	Vector pScale, pTranslate, points[4];
 	Matrix mScale, mRotate, mTranslate, mCamera;
 
@@ -331,26 +330,25 @@ void render(void)
 	else mCamera = Camera(u2, v2);
 
 
-	// Init T,R,S
-
-	Point poiCam[4] = 
-	{ pos2.x - u2.x * cameraportWidth2 / 2 + v2.x * cameraportHeight2 / 2, pos2.y + v2.y * cameraportHeight2 / 2 - u2.y * cameraportWidth2 / 2,
-	pos2.x + u2.x * cameraportWidth2 / 2 + v2.x * cameraportHeight2 / 2, pos2.y + v2.y * cameraportHeight2 / 2 + u2.y * cameraportWidth2 / 2,
-	pos2.x + u2.x * cameraportWidth2 / 2 - v2.x * cameraportHeight2 / 2, pos2.y - v2.y * cameraportHeight2 / 2 + u2.y * cameraportWidth2 / 2,
-	pos2.x - u2.x * cameraportWidth2 / 2 - v2.x * cameraportHeight2 / 2, pos2.y - v2.y * cameraportHeight2 / 2 - u2.y * cameraportWidth2 / 2 };
+	Point poiCam[4] = // Model to World
+	{ 
+	  pos2.x - (int)(u2.x * cameraportWidth2 / 2) + (int)(v2.x * cameraportHeight2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2) - (int)(u2.y * cameraportWidth2 / 2),
+	  pos2.x + (int)(u2.x * cameraportWidth2 / 2) + (int)(v2.x * cameraportHeight2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2) + (int)(u2.y * cameraportWidth2 / 2),
+	  pos2.x + (int)(u2.x * cameraportWidth2 / 2) - (int)(v2.x * cameraportHeight2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2) + (int)(u2.y * cameraportWidth2 / 2),
+	  pos2.x - (int)(u2.x * cameraportWidth2 / 2) - (int)(v2.x * cameraportHeight2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2) - (int)(u2.y * cameraportWidth2 / 2) };
 
 
 	Matrix result = mCamera;
-
+	// World to Camera
 	points[0] = matpoiMul(result, poiCam[0]);
 	points[1] = matpoiMul(result, poiCam[1]);
 	points[2] = matpoiMul(result, poiCam[2]);
 	points[3] = matpoiMul(result, poiCam[3]);
 
-	points[0] = ModelToViewport(points[0]);
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]);
-	points[3] = ModelToViewport(points[3]);
+	points[0] = WindowsToViewport(points[0]);
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]);
+	points[3] = WindowsToViewport(points[3]);
 
 	Color c;
 
@@ -361,7 +359,7 @@ void render(void)
 	DrawLine(points[2], points[3], c);
 	DrawLine(points[3], points[0], c);
 
-
+	// object1_cross
 	// Init T,R,S
 	pScale.x = pScale.y = 8;
 	pTranslate = pos1;
@@ -380,10 +378,10 @@ void render(void)
 	points[3] = matpoiMul(result, pCross[3]);
 	
 	// Convert Model to View
-	points[0] = ModelToViewport(points[0]); 
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]); 
-	points[3] = ModelToViewport(points[3]);
+	points[0] = WindowsToViewport(points[0]); 
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]); 
+	points[3] = WindowsToViewport(points[3]);
 
 	// Set RGB
 	 
@@ -414,10 +412,10 @@ void render(void)
 	points[3] = matpoiMul(result, pSquare[3]);
 
 	// Convert Model to View
-	points[0] = ModelToViewport(points[0]);
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]);
-	points[3] = ModelToViewport(points[3]);
+	points[0] = WindowsToViewport(points[0]);
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]);
+	points[3] = WindowsToViewport(points[3]);
 
 	// Set RGB
 	c.r = 255, c.g = 0, c.b = 0;
@@ -448,9 +446,9 @@ void render(void)
 	points[2] = matpoiMul(result, pTriangle[2]);
 
 	// Convert Model to View
-	points[0] = ModelToViewport(points[0]);
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]);
+	points[0] = WindowsToViewport(points[0]);
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]);
 
 	// Set RGB
 	c.r = 0, c.g = 0, c.b = 0;
@@ -481,9 +479,9 @@ void render(void)
 	points[2] = matpoiMul(result, pTriangle[2]);
 
 	// Convert Model to View
-	points[0] = ModelToViewport(points[0]);
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]);
+	points[0] = WindowsToViewport(points[0]);
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]);
 
 	// Set RGB
 	c.r = 0, c.g = 0, c.b = 255;
@@ -516,10 +514,10 @@ void render(void)
 	points[3] = matpoiMul(result, pSquare[3]);
 
 	// Convert Model to View
-	points[0] = ModelToViewport(points[0]);
-	points[1] = ModelToViewport(points[1]);
-	points[2] = ModelToViewport(points[2]);
-	points[3] = ModelToViewport(points[3]);
+	points[0] = WindowsToViewport(points[0]);
+	points[1] = WindowsToViewport(points[1]);
+	points[2] = WindowsToViewport(points[2]);
+	points[3] = WindowsToViewport(points[3]);
 
 	// Set RGB
 	c.r = 128, c.g = 128, c.b = 128;
