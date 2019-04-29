@@ -27,7 +27,7 @@ int rot;
 
 int curCam = 1;
 float viewportWidth = 640.f, viewportHeight = 480.f;
-float cameraportWidth1 = 800.f, cameraportHeight = 600.f;
+float cameraportWidth1 = 800.f, cameraportHeight1 = 600.f;
 float cameraportWidth2 = 400.f, cameraportHeight2 = 300.f;
 Point pos1 = { 0, 0 }, pos2 = { 0, 0 };
 Point u1 = { 1,0 }, u2 = { 1,0 }, v1 = { 0,1 }, v2 = { 0,1 };
@@ -127,8 +127,8 @@ Matrix Camera(const Vector &u, Vector &v)
 	else nPos = pos2;
 
 	// Fill this part
-	m.m[0][0] = u.x;	m.m[0][1] = u.y;	m.m[0][2] = (nPos.x * u.x) + (nPos.y * u.y);
-	m.m[1][0] = v.x;	m.m[1][1] = v.y;	m.m[1][2] = (nPos.x * v.x) + (nPos.y * v.y);
+	m.m[0][0] = u.x;	m.m[0][1] = u.y;	m.m[0][2] = (-nPos.x * u.x) + (-nPos.y * u.y);
+	m.m[1][0] = v.x;	m.m[1][1] = v.y;	m.m[1][2] = (-nPos.x * v.x) + (-nPos.y * v.y);
 	m.m[2][0] = 0;		m.m[2][1] = 0;		m.m[2][2] = 1;
 	return m;
 }
@@ -141,7 +141,7 @@ Point ModelToViewport(const Point &p)
 	
 	if (curCam == 1) {
 		CWIDTH = cameraportWidth1;
-		CHEIGHT = cameraportHeight;
+		CHEIGHT = cameraportHeight1;
 	}
 	else {
 		CWIDTH = cameraportWidth2;
@@ -284,10 +284,10 @@ void keyboard(unsigned char key, int x, int y)
 		pos2.x += SPEED;
 		break;
 	case 'q':
-		cameraportWidth2 /= 2, cameraportHeight2 /= 2;
+		cameraportWidth2 *= 2, cameraportHeight2 *= 2;
 		break;
 	case 'e':
-		cameraportWidth2 *= 2, cameraportHeight2 *= 2;
+		cameraportWidth2 /= 2, cameraportHeight2 /= 2;
 		break;
 	case VK_SPACE:
 		if (curCam == 1) { curCam = 0; }
@@ -335,17 +335,15 @@ void render(void)
 
 	// Init T,R,S
 
-	Point poiCam[4] = { 
-		{ pos2.x - u2.x * (int)cameraportWidth2 / 2, pos2.y + v2.y * (int)cameraportHeight2 / 2 },		//카메라 화면 좌표
-		{ pos2.x + u2.x * (int)cameraportWidth2 / 2, pos2.y + v2.y * (int)cameraportHeight2 / 2 },
-		{ pos2.x + u2.x * (int)cameraportWidth2 / 2, pos2.y - v2.y * (int)cameraportHeight2 / 2 },
-		{ pos2.x - u2.x * (int)cameraportWidth2 / 2, pos2.y - v2.y * (int)cameraportHeight2 / 2 } };
+	Point poiCam[4] = 
+	{ pos2.x - u2.x * cameraportWidth2 / 2 + v2.x * cameraportHeight2 / 2, pos2.y + v2.y * cameraportHeight2 / 2 - u2.y * cameraportWidth2 / 2,
+	pos2.x + u2.x * cameraportWidth2 / 2 + v2.x * cameraportHeight2 / 2, pos2.y + v2.y * cameraportHeight2 / 2 + u2.y * cameraportWidth2 / 2,
+	pos2.x + u2.x * cameraportWidth2 / 2 - v2.x * cameraportHeight2 / 2, pos2.y - v2.y * cameraportHeight2 / 2 + u2.y * cameraportWidth2 / 2,
+	pos2.x - u2.x * cameraportWidth2 / 2 - v2.x * cameraportHeight2 / 2, pos2.y - v2.y * cameraportHeight2 / 2 - u2.y * cameraportWidth2 / 2 };
 
 
 	Matrix result = mCamera;
-	result = matmatMul(mCamera, mTranslate);
-	result = matmatMul(result, mRotate);
-	result = matmatMul(result, mScale);
+
 	points[0] = matpoiMul(result, poiCam[0]);
 	points[1] = matpoiMul(result, poiCam[1]);
 	points[2] = matpoiMul(result, poiCam[2]);
@@ -554,7 +552,7 @@ void init(void)
 	ang2 = 0.0f, ang3 = 45.0f, ang4 = 0.0f, ang5 = 60.0f;
 	
 	int i = 0;
-	printf("Goal: Model(%d X %d) -> View (%d X %d)\n\n\n", (int)cameraportWidth1, (int)cameraportHeight, (int)WIDTH, (int)HEIGHT);
+	printf("Goal: Model(%d X %d) -> View (%d X %d)\n\n\n", (int)cameraportWidth1, (int)cameraportHeight1, (int)WIDTH, (int)HEIGHT);
 
 		
 }
