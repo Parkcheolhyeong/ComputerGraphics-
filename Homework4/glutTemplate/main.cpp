@@ -23,11 +23,16 @@ typedef Point Vector;
 int winID; 
 float ang2, ang3, ang4, ang5;
 int rot;
-Point xPos1, xPos2;
-int camO;
-float VWIDTH = 640.f, VHEGIHT = 480.f;
-float CWIDTH1 = 800.f, CHEIGHT1 = 600.f;
-float CWIDTH2 = 400.f, CHEIGHT2 = 300.f;
+
+
+int curCam = 1;
+float viewportWidth = 640.f, viewportHeight = 480.f;
+float cameraportWidth1 = 800.f, cameraportHeight = 600.f;
+float cameraportWidth2 = 400.f, cameraportHeight2 = 300.f;
+Point pos1 = { 0, 0 }, pos2 = { 0, 0 };
+Point u1 = { 1,0 }, u2 = { 1,0 }, v1 = { 0,1 }, v2 = { 0,1 };
+#define SPEED 5
+
 
 // Init points
 Point pTriangle[] = { {0, 1}, {-1, -1}, {1, -1} };
@@ -113,7 +118,20 @@ Matrix matmatMul(const Matrix &m1, const Matrix &m2)
 }
 
 
+Matrix Camera(const Vector &u, Vector &v)
+{
+	Matrix m;
+	Point nPos;
 
+	if (curCam == 1) nPos = pos1;		//카메라에 맞는 좌표 넣음
+	else nPos = pos2;
+
+	// Fill this part
+	m.m[0][0] = u.x;	m.m[0][1] = u.y;	m.m[0][2] = (nPos.x * u.x) + (nPos.y * u.y);
+	m.m[1][0] = v.x;	m.m[1][1] = v.y;	m.m[1][2] = (nPos.x * v.x) + (nPos.y * v.y);
+	m.m[2][0] = 0;		m.m[2][1] = 0;		m.m[2][2] = 1;
+	return m;
+}
 
 /* Convert from Model To View*/
 Point ModelToViewport(const Point &p)
@@ -121,17 +139,19 @@ Point ModelToViewport(const Point &p)
 	Point vPoint;
 	float CWIDTH, CHEIGHT;
 	
-	if (camO == 1) {
-		CWIDTH = CWIDTH1;
-		CHEIGHT = CHEIGHT1;
+	if (curCam == 1) {
+		CWIDTH = cameraportWidth1;
+		CHEIGHT = cameraportHeight;
 	}
 	else {
-		CWIDTH = CWIDTH2;
-		CHEIGHT = CHEIGHT2;
+		CWIDTH = cameraportWidth2;
+		CHEIGHT = cameraportHeight2;
 	}
 
 	vPoint.x = (int)((WIDTH / CWIDTH) *p.x + (WIDTH / 2.f));
 	vPoint.y = (int)((-HEIGHT / CHEIGHT) *p.y + (HEIGHT / 2.f));
+
+
 
 	return vPoint;
 }
@@ -252,20 +272,26 @@ void keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'w':
-		xPos1.y += 5.0f;
+		pos2.y += SPEED;
 		break;
 	case 'a':
-		xPos1.x -= 5.0f;
+		pos2.x -= SPEED;
 		break;
 	case 's':
-		xPos1.y -= 5.0f;
+		pos2.y -= SPEED;
 		break;
 	case 'd':
-		xPos1.x += 5.0f;
+		pos2.x += SPEED;
+		break;
+	case 'q':
+		cameraportWidth2 /= 2, cameraportHeight2 /= 2;
+		break;
+	case 'e':
+		cameraportWidth2 *= 2, cameraportHeight2 *= 2;
 		break;
 	case VK_SPACE:
-		if (rot == 1) rot = 0;
-		else rot = 1;
+		if (curCam == 1) { curCam = 0; }
+		else { curCam = 1; }
 		break;
 	case VK_ESCAPE:
 		delete[] FrameBuffer::buffer;
@@ -298,20 +324,58 @@ void render(void)
 
 	// Put your rendering code here
 
+
 	// object1_cross
 	Vector pScale, pTranslate, points[4];
-	Matrix mScale, mRotate, mTranslate;
+	Matrix mScale, mRotate, mTranslate, mCamera;
+
+	if (curCam == 1) mCamera = Camera(u1, v1);
+	else mCamera = Camera(u2, v2);
+
+
+	// Init T,R,S
+
+	Point poiCam[4] = { 
+		{ pos2.x - u2.x * (int)cameraportWidth2 / 2, pos2.y + v2.y * (int)cameraportHeight2 / 2 },		//카메라 화면 좌표
+		{ pos2.x + u2.x * (int)cameraportWidth2 / 2, pos2.y + v2.y * (int)cameraportHeight2 / 2 },
+		{ pos2.x + u2.x * (int)cameraportWidth2 / 2, pos2.y - v2.y * (int)cameraportHeight2 / 2 },
+		{ pos2.x - u2.x * (int)cameraportWidth2 / 2, pos2.y - v2.y * (int)cameraportHeight2 / 2 } };
+
+
+	Matrix result = mCamera;
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
+	result = matmatMul(result, mScale);
+	points[0] = matpoiMul(result, poiCam[0]);
+	points[1] = matpoiMul(result, poiCam[1]);
+	points[2] = matpoiMul(result, poiCam[2]);
+	points[3] = matpoiMul(result, poiCam[3]);
+
+	points[0] = ModelToViewport(points[0]);
+	points[1] = ModelToViewport(points[1]);
+	points[2] = ModelToViewport(points[2]);
+	points[3] = ModelToViewport(points[3]);
+
+	Color c;
+
+	c.r = 0, c.g = 0, c.b = 0;
+
+	DrawLine(points[0], points[1], c);
+	DrawLine(points[1], points[2], c);
+	DrawLine(points[2], points[3], c);
+	DrawLine(points[3], points[0], c);
+
 
 	// Init T,R,S
 	pScale.x = pScale.y = 8;
-	pTranslate = xPos1;
+	pTranslate = pos1;
 
 	mScale = Scale(pScale);
 	mRotate = Rotate(0.0f * DEG_TO_RAD);
 	mTranslate = Translate(pTranslate);
-
 	// Multiple T, R, S
-	Matrix result = matmatMul(mTranslate, mRotate);
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
 	result = matmatMul(result, mScale);
 
 	points[0] = matpoiMul(result, pCross[0]); 
@@ -326,7 +390,7 @@ void render(void)
 	points[3] = ModelToViewport(points[3]);
 
 	// Set RGB
-	Color c;
+	 
 	c.r = 255, c.g = 128, c.b = 0;
 
 	// Draw
@@ -337,14 +401,15 @@ void render(void)
 
 	// Init T,R,S
 	pScale.x = 60, pScale.y = 20;
-	pTranslate.x = 100 + xPos1.x, pTranslate.y = 100 + xPos1.y;
+	pTranslate.x = 100 + pos1.x, pTranslate.y = 100 + pos1.y;
 
 	mScale = Scale(pScale);
 	mRotate = Rotate(ang2 * DEG_TO_RAD);
 	mTranslate = Translate(pTranslate);
 
 	// Multiple T, R, S
-	result = matmatMul(mTranslate, mRotate);
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
 	result = matmatMul(result, mScale);
 
 	points[0] = matpoiMul(result, pSquare[0]);
@@ -372,13 +437,14 @@ void render(void)
 	// Object 3_triangle
 	// Init T,R,S
 	pScale.x = 10, pScale.y = 100;
-	pTranslate.x = -100 + xPos1.x, pTranslate.y = 100 + xPos1.y;
+	pTranslate.x = -100 + pos1.x, pTranslate.y = 100 + pos1.y;
 	mScale = Scale(pScale);
 	mRotate = Rotate(ang3 * DEG_TO_RAD);
 	mTranslate = Translate(pTranslate);
 
 	// Multipe T,R,S
-	result = matmatMul(mTranslate, mRotate);
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
 	result = matmatMul(result, mScale);
 
 	points[0] = matpoiMul(result, pTriangle[0]);
@@ -403,14 +469,15 @@ void render(void)
 	// Object4_triangle2
 	// Init T,R,S
 	pScale.x = 110, pScale.y = 50;
-	pTranslate.x = 100 + xPos1.x, pTranslate.y = -100 + xPos1.y;
+	pTranslate.x = 100 + pos1.x, pTranslate.y = -100 + pos1.y;
 
 	mScale = Scale(pScale);
 	mRotate = Rotate(ang2 * DEG_TO_RAD);
 	mTranslate = Translate(pTranslate);
 
 	// Multipe T,R,S
-	result = matmatMul(mTranslate, mRotate);
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
 	result = matmatMul(result, mScale);
 
 	points[0] = matpoiMul(result, pTriangle[0]);
@@ -436,14 +503,15 @@ void render(void)
 	// Init T,R,S
 
 	pScale.x = 100, pScale.y = 25;
-	pTranslate.x = -100 + xPos1.x, pTranslate.y = -100 + xPos1.y;
+	pTranslate.x = -100 + pos1.x, pTranslate.y = -100 + pos1.y;
 
 	mScale = Scale(pScale);
 	mRotate = Rotate(ang5 * DEG_TO_RAD);
 	mTranslate = Translate(pTranslate);
 
 	// Multipe T,R,S
-	result = matmatMul(mTranslate, mRotate);
+	result = matmatMul(mCamera, mTranslate);
+	result = matmatMul(result, mRotate);
 	result = matmatMul(result, mScale);
 
 	points[0] = matpoiMul(result, pSquare[0]);
@@ -481,12 +549,12 @@ void init(void)
 	//Initialize everything here
 	rot = 1;
 
-	xPos1.x = xPos1.y = 0.0f;
-	xPos2.x = xPos2.y = 0.0f;
+	pos1.x = pos1.y = 0.0f;
+	pos2.x = pos2.y = 0.0f;
 	ang2 = 0.0f, ang3 = 45.0f, ang4 = 0.0f, ang5 = 60.0f;
 	
 	int i = 0;
-	printf("Goal: Model(%d X %d) -> View (%d X %d)\n\n\n", (int)CWIDTH1, (int)CHEIGHT1, (int)WIDTH, (int)HEIGHT);
+	printf("Goal: Model(%d X %d) -> View (%d X %d)\n\n\n", (int)cameraportWidth1, (int)cameraportHeight, (int)WIDTH, (int)HEIGHT);
 
 		
 }
