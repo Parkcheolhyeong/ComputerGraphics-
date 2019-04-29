@@ -20,18 +20,16 @@ typedef struct tagMatrix {
 typedef Point Vector;
 
 /* Global Varies*/
-int winID; 
-float ang2, ang3, ang4, ang5;
-int rot;
-
-
-int curCam = 1;
-float viewportWidth = 640.f, viewportHeight = 480.f;
-float cameraportWidth1 = 800.f, cameraportHeight1 = 600.f;
-float cameraportWidth2 = 400.f, cameraportHeight2 = 300.f;
-Point pos1 = { 0, 0 }, pos2 = { 0, 0 };
-Point u1 = { 1,0 }, u2 = { 1,0 }, v1 = { 0,1 }, v2 = { 0,1 };
-#define SPEED 5
+int winID; // window's name 
+float ang2, ang3, ang4, ang5;  // object's name
+int rot;	// pos1's rotation
+int curCam = 1;	// option of cameravieport
+float viewportWidth = 640.f, viewportHeight = 480.f;	// viewport
+float cameraportWidth1 = 800.f, cameraportHeight1 = 600.f;	// cameraport1
+float cameraportWidth2 = 400.f, cameraportHeight2 = 300.f;	// cameraport2
+Point pos1 = { 0, 0 }, pos2 = { 0, 0 };	// pos1 is cameraport1 position, po2 is cameraport2 position
+Point u1 = { 1,0 }, u2 = { 1,0 }, v1 = { 0,1 }, v2 = { 0,1 }; // upvector, rightvector
+#define SPEED 5	// speed of translation
 
 
 // Init points
