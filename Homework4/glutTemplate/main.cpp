@@ -332,10 +332,10 @@ void render(void)
 
 	Point poiCam[4] = // Model to World
 	{ 
-	  pos2.x - (int)(u2.x * cameraportWidth2 / 2) + (int)(v2.x * cameraportHeight2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2) - (int)(u2.y * cameraportWidth2 / 2),
-	  pos2.x + (int)(u2.x * cameraportWidth2 / 2) + (int)(v2.x * cameraportHeight2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2) + (int)(u2.y * cameraportWidth2 / 2),
-	  pos2.x + (int)(u2.x * cameraportWidth2 / 2) - (int)(v2.x * cameraportHeight2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2) + (int)(u2.y * cameraportWidth2 / 2),
-	  pos2.x - (int)(u2.x * cameraportWidth2 / 2) - (int)(v2.x * cameraportHeight2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2) - (int)(u2.y * cameraportWidth2 / 2) };
+	  pos2.x - (int)(u2.x * cameraportWidth2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2),
+	  pos2.x + (int)(u2.x * cameraportWidth2 / 2), pos2.y + (int)(v2.y * cameraportHeight2 / 2),
+	  pos2.x + (int)(u2.x * cameraportWidth2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2),
+	  pos2.x - (int)(u2.x * cameraportWidth2 / 2), pos2.y - (int)(v2.y * cameraportHeight2 / 2)};
 
 
 	Matrix result = mCamera;
@@ -354,11 +354,13 @@ void render(void)
 
 	c.r = 0, c.g = 0, c.b = 0;
 
-	DrawLine(points[0], points[1], c);
-	DrawLine(points[1], points[2], c);
-	DrawLine(points[2], points[3], c);
-	DrawLine(points[3], points[0], c);
-
+	/* Prevent DrawLine */
+	if (curCam == 1) {
+		DrawLine(points[0], points[1], c);
+		DrawLine(points[1], points[2], c);
+		DrawLine(points[2], points[3], c);
+		DrawLine(points[3], points[0], c);
+	}
 	// object1_cross
 	// Init T,R,S
 	pScale.x = pScale.y = 8;
