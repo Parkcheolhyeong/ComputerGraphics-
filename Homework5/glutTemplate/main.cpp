@@ -70,82 +70,9 @@ void DrawHLine(Point p1, Point p2, Color c)
 	}
 }
 
-/* DDA Draw Algorithm */
-void DrawLine(Point p1, Point p2, Color c) {
-
-
-	int x0 = p1.x, x1 = p2.x;  
-	int y0 = p1.y, y1 = p2.y;
-	int x, y;
-	float _x, _y;
-
-	float dx = x1 - x0; // distance x
-	float dy = y1 - y0; // distance y
-	float m = (float)dy / (float)dx; // gradient
-
-
-	if (dy == 0) { // Vertical
-		DrawVLine(p1, p2, c);
-		return;
-	}
-
-	if (dx == 0) { // Horizon
-		DrawHLine(p1, p2, c);
-		return;
-	}
-
-	if (m >= -1 && m <= 1) { // Gradient
-		if (dx < 0) { // Up & Swap
-			int temp = x0;
-			x0 = x1; x1 = temp;
-			temp = y0;
-			y0 = y1; y1 = temp;
-			dx = -1;
-			dy = -1;
-		}
-		/*swap*/
-		x = x0;
-		y = y0;
-
-		/* Init round(_x, _y)*/
-		_x = x0;
-		_y = y0;	
-
-		while (x < x1) {
-			x++; // Calc y
-			_y = (_y + (float)m);
-			y = (int)(_y + 0.5); // round Calc
-			
-			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
-		}
-	}
-	else {
-		if (dy < 0) {
-			int temp = x0;
-			x0 = x1;
-			x1 = temp;
-			temp = y0;
-			y0 = y1;
-			y1 = temp;
-			dx = -1;
-			dy = -1;
-		}
-		x = x0;
-		y = y0;
-		_x = x0;
-		_y = y0;
-		while (y < y1) {
-			y++; //Calc x
-			_x = (float)(_x + 1 / m);
-			x = (int)(_x + 0.5); // round Calc
-			FrameBuffer::SetPixel(x, y, c.r, c.g, c.b);
-		}
-	}
-
-
-}
 void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 {
+
 	if (X1 > X2)			//반대방향일 경우 재귀호출
 	{
 		midPoint(X2, Y2, X1, Y1);
@@ -165,18 +92,18 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 	{
 		if (m <= 1)
 		{
-			float d = dy - (dx / 2);
+			float d = 2 * dy - (dx);
 
 			while (x < X2)
 			{
 				x++;
 
-				if (d < 0)							// E or East is chosen
-					d = d + dy;
+				if (d <= 0)							// E or East is chosen
+					d = d + (2 * dy);
 
 				else								// NE or North East is chosen
 				{
-					d += (dy - dx);
+					d += (2*dy - 2*dx);
 					y++;
 				}
 
@@ -186,20 +113,20 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 		}
 		else if (m > 1)
 		{
-			float d = dx - (dy / 2);
+			float d = (2*dx) - dy;
 
 			while (y < Y2)
 			{
 				y++;
 
 
-				if (d < 0)				// E or East is chosen
-					d = d + dx;
+				if (d <= 0)				// E or East is chosen
+					d = d + (2*dx);
 
 
 				else					// NE or North East is chosen
 				{
-					d += (dx - dy);
+					d += (2*dx - 2*dy);
 					x++;
 				}
 
@@ -217,18 +144,18 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 
 		if (m <= 1)
 		{
-			float d = dy - (dx / 2);
+			float d = 2 * dy - (dx);
 
 			while (x < X2)
 			{
 				x++;
 
 				if (d > 0)				// E or East is chosen
-					d = d - dy;
+					d = d - (2 * dy);
 
 				else					// NE or North East is chosen
 				{
-					d -= (dy - dx);
+					d -= (2 * dy - 2 * dx);
 					y--;
 				}
 
@@ -238,18 +165,18 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 		}
 		if (m > 1)
 		{
-			float d = dx - (dy / 2);
+			float d = (2 * dx) - dy;
 
 			while (y > Y2)
 			{
 				y--;
 
 				if (d > 0)				// E or East is chosen
-					d = d - dx;
+					d = d - (2*dx);
 
 				else					// NE or North East is chosen
 				{
-					d -= (dx - dy);
+					d -= (2 * dx - 2 * dy);
 					x++;
 				}
 
