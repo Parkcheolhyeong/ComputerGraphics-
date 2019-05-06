@@ -73,19 +73,19 @@ void DrawHLine(Point p1, Point p2, Color c)
 void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 {
 
-	if (X1 > X2)			//반대방향일 경우 재귀호출
+	if (X1 > X2)			// Opposite direction
 	{
 		midPoint(X2, Y2, X1, Y1);
 		return;
 	}
 
-	float dx = X2 - X1;			//x증가량
-	float dy = Y2 - Y1;			//y증가량
+	float dx = X2 - X1;			// Distance of X
+	float dy = Y2 - Y1;			// Distance of Y
 
-	float x = X1, y = Y1;		//x1,y1 좌표
-	float m = sqrt(pow(dy / dx, 2));		//기울기의 절대값
+	float x = X1, y = Y1;		// Values of x1, x2
+	float m = sqrt(pow(dy / dx, 2));		// Absolute gradient value
 
-	printf("%lf, %lf\n", x, y);		//x,y 좌표를 확인하기 위한 Debug log
+	printf("%lf, %lf\n", x, y);		// print of x, y coordinate
 
 
 	if (dx > 0 && dy > 0)
@@ -107,8 +107,8 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 					y++;
 				}
 
-				printf("%lf, %lf\n", x, y);		//x,y 좌표를 확인하기 위한 Debug log
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);			//분면 마다 색깔을 다르게 하여 구분
+				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+				FrameBuffer::SetPixel(x, y, 0, 0, 0);	
 			}
 		}
 		else if (m > 1)
@@ -130,8 +130,8 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 					x++;
 				}
 
-				printf("%lf, %lf\n", x, y);		//x,y 좌표를 확인하기 위한 Debug log
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);			//분면 마다 색깔을 다르게 하여 구분
+				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+				FrameBuffer::SetPixel(x, y, 0, 0, 0);
 			}
 
 		}
@@ -159,8 +159,8 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 					y--;
 				}
 
-				printf("%lf, %lf\n", x, y);		//x,y 좌표를 확인하기 위한 Debug log
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);			//분면 마다 색깔을 다르게 하여 구분
+				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+				FrameBuffer::SetPixel(x, y, 0, 0, 0);
 			}
 		}
 		if (m > 1)
@@ -180,8 +180,8 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 					x++;
 				}
 
-				printf("%lf, %lf\n", x, y);		//x,y 좌표를 확인하기 위한 Debug log
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);			//분면 마다 색깔을 다르게 하여 구분
+				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+				FrameBuffer::SetPixel(x, y, 0, 0, 0);
 			}
 
 		}
