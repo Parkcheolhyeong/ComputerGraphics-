@@ -83,110 +83,74 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 	float dy = Y2 - Y1;			// Distance of Y
 
 	float x = X1, y = Y1;		// Values of x1, x2
-	float m = sqrt(pow(dy / dx, 2));		// Absolute gradient value
+	float m = fabs(dy / dx);		// Absolute gradient value
 
+	float xStep = 0.f, yStep = 0.f;
 	printf("%lf, %lf\n", x, y);		// print of x, y coordinate
 
 
-	if (dx > 0 && dy > 0)
+	xStep = (dx > 0) ? 1.f : -1.f;
+	dx = (dx > 0) ? dx : -dx;
+	yStep = (dy > 0) ? 1.f : -1.f;
+	dy = (dy > 0) ? dy : -dy;
+
+	if (m <= 1)
 	{
-		if (m <= 1)
+		float d = (2 * dy) - (dx);
+		float de = (2 * dy);
+		float dne = (2 * dy - 2 * dx);
+
+		FrameBuffer::SetPixel(x, y, 0, 0, 0);
+
+		while (dx > 0)
 		{
-			float d = 2 * dy - (dx);
+			x+=xStep;
 
-			while (x < X2)
+			if (d <= 0)							// E or East is chosen
+				d += de;
+
+			else								// NE or North East is chosen
 			{
-				x++;
-
-				if (d <= 0)							// E or East is chosen
-					d = d + (2 * dy);
-
-				else								// NE or North East is chosen
-				{
-					d += (2*dy - 2*dx);
-					y++;
-				}
-
-				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);	
-			}
-		}
-		else if (m > 1)
-		{
-			float d = (2*dx) - dy;
-
-			while (y < Y2)
-			{
-				y++;
-
-
-				if (d <= 0)				// E or East is chosen
-					d = d + (2*dx);
-
-
-				else					// NE or North East is chosen
-				{
-					d += (2*dx - 2*dy);
-					x++;
-				}
-
-				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);
+				d += dne;
+				y+=yStep;
 			}
 
+			printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+			FrameBuffer::SetPixel(x, y, 0, 0, 0);
+			dx--;
 		}
 	}
-
-	if (dy < 0 || dx < 0)
+	else if (m > 1)
 	{
-		if (dy < 0)
-			dy *= -1;
+		float d = (2 * dx) - dy;
+		float dn = 2 * dx;
+		float dne = (2 * dx) - (2 * dy);
 
-		if (m <= 1)
+		FrameBuffer::SetPixel(x, y, 0, 0, 0);
+
+		while (dy>0)
 		{
-			float d = 2 * dy - (dx);
+			y+=yStep;
 
-			while (x < X2)
+
+			if (d <= 0)				// E or East is chosen
+				d += dn;
+
+
+			else					// NE or North East is chosen
 			{
-				x++;
-
-				if (d > 0)				// E or East is chosen
-					d = d - (2 * dy);
-
-				else					// NE or North East is chosen
-				{
-					d -= (2 * dy - 2 * dx);
-					y--;
-				}
-
-				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);
-			}
-		}
-		if (m > 1)
-		{
-			float d = (2 * dx) - dy;
-
-			while (y > Y2)
-			{
-				y--;
-
-				if (d > 0)				// E or East is chosen
-					d = d - (2*dx);
-
-				else					// NE or North East is chosen
-				{
-					d -= (2 * dx - 2 * dy);
-					x++;
-				}
-
-				printf("%lf, %lf\n", x, y);		// print of x, y coordinate
-				FrameBuffer::SetPixel(x, y, 0, 0, 0);
+				d += dne;
+				x+=xStep;
 			}
 
+			printf("%lf, %lf\n", x, y);		// print of x, y coordinate
+			FrameBuffer::SetPixel(x, y, 0, 0, 0);
+			dy--;
 		}
+
 	}
 }
+	
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
