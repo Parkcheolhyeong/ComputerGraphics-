@@ -17,58 +17,7 @@ typedef struct Color {
 int winID;
 Point p1 = { 0, 0 }, p2 = { 0, 0 };
 
-// Init Points, Color
-Point points[10] = { {0, 0}, {-300, 200},{-300, -200},
-					{-100, -150}, {-100, 150},
-					{300, 0}, {300, 200},
-					{100, 200}, {100, 0}, {100, -200} };
-Color b = { 0, 0, 0 };
 
-/* Convert from Camera To View*/
-Point CameraToViewport(const Point &p)
-{
-	Point vPoint;
-	vPoint.x = (int)((WIDTH / CWIDTH) *p.x + (WIDTH / 2.f));
-	vPoint.y = (int)((-HEIGHT / CHEIGHT) *p.y + (HEIGHT / 2.f));
-
-	return vPoint;
-}
-
-/* Draw to Line (Vertical, Horizon, Gradient */
-
-void DrawVLine(Point p1, Point p2, Color c)
-{
-	if (p1.y - p2.y == 0)
-	{
-		if (p1.x < p2.x)
-		{
-			// p1 to p2
-			for (int i = p1.x; i < p2.x; i++)
-				FrameBuffer::SetPixel(i, p1.y, c.r, c.g, c.b);
-		}
-		else {
-			// p2 to p1
-			for (int i = p2.x; i < p1.x; i++)
-				FrameBuffer::SetPixel(i, p2.y, c.r, c.g, c.b);
-		}
-	}
-}
-void DrawHLine(Point p1, Point p2, Color c)
-{
-	if (p1.x - p2.x == 0) {
-		if (p1.y < p2.y)
-		{
-			// p1 to p2
-			for (int i = p1.y; i < p2.y; i++)
-				FrameBuffer::SetPixel(p1.x, i, c.r, c.g, c.b);
-		}
-		else {
-			// p2 to p1
-			for (int i = p2.y; i < p1.y; i++)
-				FrameBuffer::SetPixel(p2.x, i, c.r, c.g, c.b);
-		}
-	}
-}
 
 void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 {
@@ -222,16 +171,6 @@ void render(void)
 void init(void)
 {
 	FrameBuffer::Init(WIDTH, HEIGHT);
-	int i = 0;
-	printf("Goal: Camera(%d X %d) -> View (%d X %d)\n\n\n", (int)CWIDTH, (int)CHEIGHT, (int)WIDTH, (int)HEIGHT);
-
-	// Convert from Camerat to View
-	for (i = 1; i < 10; i++)
-	{
-		printf("P_c[%4d](%4d, %4d) -> ", i, points[i].x, points[i].y);
-		points[i] = CameraToViewport(points[i]);
-		printf("P_v[%4d](%4d, %4d)\n", i, points[i].x, points[i].y);
-	}
 }
 
 int main (int argc, char **argv)
