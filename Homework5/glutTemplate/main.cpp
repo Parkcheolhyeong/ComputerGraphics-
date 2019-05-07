@@ -22,12 +22,6 @@ Point p1 = { 0, 0 }, p2 = { 0, 0 };
 void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 {
 
-	if (X1 > X2)			// Opposite direction
-	{
-		midPoint(X2, Y2, X1, Y1);
-		return;
-	}
-
 	float dx = X2 - X1;			// Distance of X
 	float dy = Y2 - Y1;			// Distance of Y
 
@@ -37,13 +31,13 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 	float xStep = 0.f, yStep = 0.f;
 	printf("%lf, %lf\n", x, y);		// print of x, y coordinate
 
-
+	/* Three-ways operator */
 	xStep = (dx > 0) ? 1.f : -1.f;
 	dx = (dx > 0) ? dx : -dx;
 	yStep = (dy > 0) ? 1.f : -1.f;
 	dy = (dy > 0) ? dy : -dy;
 
-	if (m <= 1)
+	if (m <= 1) //Bigger dx than dy or Same
 	{
 		float d = (2 * dy) - (dx);
 		float de = (2 * dy);
@@ -69,7 +63,7 @@ void midPoint(float X1, float Y1, float X2, float Y2)		//Midpoint Line Algorithm
 			dx--;
 		}
 	}
-	else if (m > 1)
+	else if (m > 1) // Bigger dy than dx
 	{
 		float d = (2 * dx) - dy;
 		float dn = 2 * dx;
