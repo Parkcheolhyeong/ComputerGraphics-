@@ -15,9 +15,12 @@ typedef struct Color {
 } Color;
 
 
-int winID;
-int circleState = 1;
-Point centerPoint = { 0, 0 }, radiusPoint = { 0, 0 };
+int winID;	// window's name
+int flagDoubleDraw = 1;	// flag to prevent double draw
+int circleState = 1;	// flag to active key 'c'
+Point centerPoint = { 0, 0 }, radiusPoint = { 0, 0 };	// Point of center, radius
+
+/* EightWaySymmetric */
 void DrawCircleEightWaySymmetric(int x, int y, int xC, int yC)
 {
 	FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
@@ -29,28 +32,39 @@ void DrawCircleEightWaySymmetric(int x, int y, int xC, int yC)
 	FrameBuffer::SetPixel(-y + xC, -x + yC, 0, 0, 0);
 	FrameBuffer::SetPixel(-y + xC, x + yC, 0, 0, 0);
 }
-void drawcircle(int xC, int yC, float radius)
+
+/* Midpoint CIrcle Drawing */
+void MidpointCircleDraw(int xC, int yC, float radius)
 {
+	/* Init x, y */
 	int x = 0;
 	int y = round(radius);
+
+	/* Init decision variables */
 	float d = (float)(5 / 4) - radius;
 	float dE = (2 * x) + 3;
 	float dSE = (2 * (x - y)) + 5;
+
+	/* Init xStep, yStep */
 	int xStep = 1;
 	int yStep = 1;
 
 	while (x<=y) {
-		if (d > 0) {
+		if (d > 0) {	// Outside of Circle
+		/* Update decision variables and coordinate*/
 		d += dSE;
 		dE += 2.f; dSE += 4.f;
+
 		x += xStep;
 		y -= yStep;
-		DrawCircleEightWaySymmetric(x, y, xC, yC);
-		}else if (d <= 0) {
+
+		DrawCircleEightWaySymmetric(x, y, xC, yC);	// Drawing Eight Way
+		} else if (d <= 0) {	// Inside of CIrcle or Boundary of Circle
+			/* Update decision variables and coordinate*/
 			d += dE;
 			dE += 2.f; dSE += 2.f;
 			x += xStep;
-			DrawCircleEightWaySymmetric(x, y, xC, yC);
+			DrawCircleEightWaySymmetric(x, y, xC, yC);	// Drawing Eight Way
 		} 
 	}
 		
@@ -61,16 +75,14 @@ void keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'c':
-		circleState = 0;
+		circleState = 0; flagDoubleDraw = 1;	// Init flag variables
 		break;
 	case 'r':
-		FrameBuffer::Clear(255, 255, 255);
+		FrameBuffer::Clear(255, 255, 255);		// Init view
+		circleState = 1; flagDoubleDraw = 1;	// Init flag variables
+
 		break;
-	case VK_ESCAPE:
-		delete[] FrameBuffer::buffer;
-		glutDestroyWindow(winID);
-		exit(0);
-		break;
+
 	}
 }
 
@@ -79,27 +91,34 @@ void mouse(int button, int state, int x, int y)
 	switch (button)
 	{
 	case (GLUT_LEFT_BUTTON):
-		if (state == GLUT_DOWN)
+		if (state == GLUT_DOWN)	// Save CenterPoint & Set flagDoubleDraw
 		{
 			printf("1\n");
 			printf("%d, %d\n", x, y);
+
 			centerPoint.x = x;
 			centerPoint.y = y;
+			flagDoubleDraw = 0;
 		}
 		break;
 
 	case (GLUT_RIGHT_BUTTON):
-		if (state == GLUT_DOWN)
+		if (state == GLUT_DOWN)	// Save radiusPoint & Drawing Circle & Set flagDoubleDraw
 		{
-			if (circleState == 0)
+			if (circleState == 0 && flagDoubleDraw == 0)
 			{
+				float r = 0.f;
+				
 				radiusPoint.x = x;
 				radiusPoint.y = y;
-				float r = sqrt(pow(radiusPoint.x - centerPoint.x, 2) + pow(radiusPoint.y - centerPoint.y, 2));
 				printf("2\n");
 				printf("%d, %d\n", x, y);
 
-				drawcircle(centerPoint.x, centerPoint.y, r);
+				r = sqrt(pow(radiusPoint.x - centerPoint.x, 2) + pow(radiusPoint.y - centerPoint.y, 2));	// Calc radius
+
+
+				MidpointCircleDraw(centerPoint.x, centerPoint.y, r);
+				flagDoubleDraw = 1;
 			}
 		}
 		break;
