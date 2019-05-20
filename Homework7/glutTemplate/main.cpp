@@ -16,11 +16,12 @@ typedef struct Color {
 
 Color Black = {0, 0, 0};
 int winID;	// window's name
-int flagDoubleDraw = 1;	// flag to prevent double draw
-int circleState = 1;	// flag to active key 'c'
+int flagCenter = 1;	// flag to prevent double draw
+int flagX = 1;	// flag to active key 'c'
+int flagY = 1; 
 Point pC = { 0, 0 }, pX = { 0, 0 }, pY = { 0, 0 };	// Point of center, x, y
 
-/* EightWaySymmetric */
+/* FourWaySymmetric */
 void DrawCircleFourWaySymmetric(int x, int y, int xC, int yC)
 {
 	FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
@@ -32,16 +33,19 @@ void DrawCircleFourWaySymmetric(int x, int y, int xC, int yC)
 /* Midpoint Ellipse Drawing */
 void MidpointEllipseDraw(int xC, int yC, float a, float b)
 {
-	/* Init x, y */
 	int x, y;
 	float d1, dE1, dSE1;
 	float d2, dS2, dSE2;
 	int powA, powB;
-	int x0 = pow(a, 2) / sqrt(pow(a, 2) + pow(b, 2));
-	int y0 = pow(b, 2) / sqrt(pow(a, 2) + pow(b, 2));
+
+	
+	int x0 = pow(a, 2) / sqrt(pow(a, 2) + pow(b, 2)); // x of Gradient Value for -1 
+	int y0 = pow(b, 2) / sqrt(pow(a, 2) + pow(b, 2)); // y of Gradient Value for -1
+	/* Init x, y */
 	x = 0;
 	y = round(b);
 	powA = pow(a,2); powB = pow(b,2);
+
 	/* Init decision variables */
 	d1 = powB - (powA * b) + (powA / 4);
 	dE1 = (3 * powB);
@@ -58,22 +62,15 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 		/* Update decision variables and coordinate*/
 			x += xStep;
 			y -= yStep;
-			FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, -y + yC, 0, 0, 0);
-	
+
+			DrawCircleFourWaySymmetric(x, y, xC, yC);	
 			d1 += dSE1;
 			dE1 += 2 * powB;
 			dSE1 += ((2 * powB) + (2 * powA));
 		} else if (d1 <= 0) {	// Inside of CIrcle or Boundary of Circle
 			/* Update decision variables and coordinate*/
 			x += xStep;
-			FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, -y + yC, 0, 0, 0);
-
+			DrawCircleFourWaySymmetric(x, y, xC, yC);
 			d1 += dE1;
 			dE1 += 2 * powB;
 			dSE1 += 2 * powB;
@@ -87,6 +84,7 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 	d2 = (powB*x) - (2 * powA * y) + powA + (powB / 4);
 	dS2 = -(2 * powA*y) + (3 * powA);
 	dSE2 = (2 * powB* x) - (2 * powA * y) + (3 * powA);
+
 	while (y >= 0) {
 
 		/* Init x, y */
@@ -94,10 +92,7 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 		if (d2 > 0) {
 			y -= yStep;
 
-			FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, -y + yC, 0, 0, 0);
+			DrawCircleFourWaySymmetric(x, y, xC, yC); 
 			d2 += dS2;
 			dS2 += 2 * powA;
 			dSE2 += 2 * powA;
@@ -107,10 +102,8 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 		   /* Update decision variables and coordinate*/
 			y -= yStep;
 			x += xStep;
-			FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
-			FrameBuffer::SetPixel(-x + xC, -y + yC, 0, 0, 0);
+			
+			DrawCircleFourWaySymmetric(x, y, xC, yC); 
 			d2 += dSE2;
 			dS2 += 2 * powA;
 			dSE2 += (2 * powB) + (2 * powA);
@@ -126,11 +119,11 @@ void keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'e':
-		circleState = 0; flagDoubleDraw = 1;	// Init flag variables
+		flagCenter = 0;	// Init flag variables
 		break;
 	case 'r':
 		FrameBuffer::Clear(255, 255, 255);		// Init view
-		circleState = 1; flagDoubleDraw = 1;	// Init flag variables
+		flagCenter = 1; flagX = 1; flagY = 1;	// Init flag variables
 
 		break;
 
@@ -142,45 +135,48 @@ void mouse(int button, int state, int x, int y)
 	switch (button)
 	{
 	case (GLUT_LEFT_BUTTON):
-		if (state == GLUT_DOWN)	// Save CenterPoint & Set flagDoubleDraw
+		if (state == GLUT_DOWN && flagCenter == 0)	// Save CenterPoint & Set flagDoubleDraw
 		{
-			printf("1\n");
+			printf("LEFT: ");
 			printf("%d, %d\n", x, y);
 
 			pC.x = x;
 			pC.y = y;
-			flagDoubleDraw = 0;
+			flagX = 0;
 		}
 		break;
 
 	case (GLUT_RIGHT_BUTTON):	// Value of b
 		if (state == GLUT_DOWN)	// Save radiusPoint & Drawing Circle & Set flagDoubleDraw
 		{
-			//if (circleState == 0 && flagDoubleDraw == 0)
-			//{
+			if (flagCenter == 0 && flagX==0 && flagY == 0)
+			{
 				pY.x = x;
 				pY.y = y;
-				printf("2\n");
+				printf("Right:");
 				printf("%d, %d\n", x, y);
-				
-				float rX = sqrt(pow(pX.x - pC.x, 2) + pow(pX.y - pC.y, 2));
-				float rY = sqrt(pow(pY.x - pC.x, 2) + pow(pY.y - pC.y, 2));
+
+				float rX = sqrt(pow(pX.x - pC.x, 2) + pow(pX.y - pC.y, 2)); // Majoir axis
+				float rY = sqrt(pow(pY.x - pC.x, 2) + pow(pY.y - pC.y, 2)); // Minor axis
 				printf("%f, %f\n", rX, rY);
 				MidpointEllipseDraw(pC.x, pC.y, rX, rY);
-				flagDoubleDraw = 1;
-			//}
+				flagX = 1; flagY = 1;
+			}
 		}
 		break;
 
 	case (GLUT_MIDDLE_BUTTON):	// Value of a
 		if (state == GLUT_DOWN)
 		{
-			pX.x = x;
-			pX.y = y;
+			if (flagCenter == 0 && flagX == 0)
+			{
+				pX.x = x;
+				pX.y = y;
 
-			printf("3\n");
-			printf("%d, %d\n", x, y);
-
+				printf("Middle: ");
+				printf("%d, %d\n", x, y);
+				flagY = 0;
+			}
 		}
 		break;
 	}	
@@ -198,9 +194,6 @@ void loop(void)
 
 void render(void)
 {
-
-	
-
 	glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, FrameBuffer::buffer);
 	glutSwapBuffers();
 }
