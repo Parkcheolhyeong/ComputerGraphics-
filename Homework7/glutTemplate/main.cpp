@@ -14,11 +14,11 @@ typedef struct Color {
 	unsigned char r, g, b;
 } Color;
 
-Color Black = {0, 0, 0};
+Color Black = { 0, 0, 0 };
 int winID;	// window's name
 int flagCenter = 1;	// flag to prevent double draw
 int flagX = 1;	// flag to active key 'c'
-int flagY = 1; 
+int flagY = 1;
 Point pC = { 0, 0 }, pX = { 0, 0 }, pY = { 0, 0 };	// Point of center, x, y
 
 /* FourWaySymmetric */
@@ -31,20 +31,20 @@ void DrawCircleFourWaySymmetric(int x, int y, int xC, int yC)
 }
 
 /* Midpoint Ellipse Drawing */
-void MidpointEllipseDraw(int xC, int yC, float a, float b)
+void MidpointEllipseDraw(int xC, int yC, int a, int b)
 {
 	int x, y;
-	float d1, dE1, dSE1;
-	float d2, dS2, dSE2;
+	int d1, dE1, dSE1;
+	int d2, dS2, dSE2;
 	int powA, powB;
 
-	
+
 	int x0 = pow(a, 2) / sqrt(pow(a, 2) + pow(b, 2)); // x of Gradient Value for -1 
 	int y0 = pow(b, 2) / sqrt(pow(a, 2) + pow(b, 2)); // y of Gradient Value for -1
 	/* Init x, y */
 	x = 0;
 	y = round(b);
-	powA = pow(a,2); powB = pow(b,2);
+	powA = pow(a, 2); powB = pow(b, 2);
 
 	/* Init decision variables */
 	d1 = powB - (powA * b) + (powA / 4);
@@ -55,7 +55,7 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 	int xStep = 1;
 	int yStep = 1;
 
-	while (x<= x0) {
+	while (x <= x0) {
 
 
 		if (d1 > 0) {	// Outside of Circle
@@ -63,12 +63,13 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 			x += xStep;
 			y -= yStep;
 
-			DrawCircleFourWaySymmetric(x, y, xC, yC);	
+			DrawCircleFourWaySymmetric(x, y, xC, yC);
 			d1 += dSE1;
 			dE1 += 2 * powB;
 			dSE1 += ((2 * powB) + (2 * powA));
-		} else if (d1 <= 0) {	// Inside of CIrcle or Boundary of Circle
-			/* Update decision variables and coordinate*/
+		}
+		else if (d1 <= 0) {	// Inside of CIrcle or Boundary of Circle
+		 /* Update decision variables and coordinate*/
 			x += xStep;
 			DrawCircleFourWaySymmetric(x, y, xC, yC);
 			d1 += dE1;
@@ -76,7 +77,7 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 			dSE1 += 2 * powB;
 
 		}
-		
+
 
 	}
 
@@ -92,7 +93,7 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 		if (d2 > 0) {
 			y -= yStep;
 
-			DrawCircleFourWaySymmetric(x, y, xC, yC); 
+			DrawCircleFourWaySymmetric(x, y, xC, yC);
 			d2 += dS2;
 			dS2 += 2 * powA;
 			dSE2 += 2 * powA;
@@ -102,24 +103,25 @@ void MidpointEllipseDraw(int xC, int yC, float a, float b)
 		   /* Update decision variables and coordinate*/
 			y -= yStep;
 			x += xStep;
-			
-			DrawCircleFourWaySymmetric(x, y, xC, yC); 
+
+			DrawCircleFourWaySymmetric(x, y, xC, yC);
 			d2 += dSE2;
 			dS2 += 2 * powA;
 			dSE2 += (2 * powB) + (2 * powA);
 
 		}
-		
+
 	}
-		
+
 }
-	
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
 	case 'e':
-		flagCenter = 0;	// Init flag variables
+		flagCenter = 0;	// Set step1 of flag
+
 		break;
 	case 'r':
 		FrameBuffer::Clear(255, 255, 255);		// Init view
@@ -142,25 +144,26 @@ void mouse(int button, int state, int x, int y)
 
 			pC.x = x;
 			pC.y = y;
-			flagX = 0;
+			flagX = 0; // Set step2 of flag
 		}
 		break;
 
 	case (GLUT_RIGHT_BUTTON):	// Value of b
 		if (state == GLUT_DOWN)	// Save radiusPoint & Drawing Circle & Set flagDoubleDraw
 		{
-			if (flagCenter == 0 && flagX==0 && flagY == 0)
+			if (flagCenter == 0 && flagX == 0 && flagY == 0)
 			{
+				int rX = 0, rY = 0;
 				pY.x = x;
 				pY.y = y;
 				printf("Right:");
 				printf("%d, %d\n", x, y);
 
-				float rX = sqrt(pow(pX.x - pC.x, 2) + pow(pX.y - pC.y, 2)); // Majoir axis
-				float rY = sqrt(pow(pY.x - pC.x, 2) + pow(pY.y - pC.y, 2)); // Minor axis
+				rX = sqrt(pow(pX.x - pC.x, 2) + pow(pX.y - pC.y, 2)); // Majoir axis
+				rY = sqrt(pow(pY.x - pC.x, 2) + pow(pY.y - pC.y, 2)); // Minor axis
 				printf("%f, %f\n", rX, rY);
 				MidpointEllipseDraw(pC.x, pC.y, rX, rY);
-				flagX = 1; flagY = 1;
+				flagX = 1; flagY = 1; // Unset step2, 3 of flag
 			}
 		}
 		break;
@@ -175,11 +178,11 @@ void mouse(int button, int state, int x, int y)
 
 				printf("Middle: ");
 				printf("%d, %d\n", x, y);
-				flagY = 0;
+				flagY = 0; // Set step3 of flag
 			}
 		}
 		break;
-	}	
+	}
 }
 
 
@@ -203,13 +206,13 @@ void init(void)
 	FrameBuffer::Init(WIDTH, HEIGHT);
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(WIDTH, HEIGHT);
-	
+
 	winID = glutCreateWindow("5293564_¹ÚÃ¶Çü");	// Window name
 
 	glClearColor(0, 0, 0, 1);
