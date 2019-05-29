@@ -24,20 +24,12 @@ int winID;	// window's name
 int counter = 0;
 point2d_Float rVertices[3] = { {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f} }; // Three Point of vertice, x, y
 
-/* FourWaySymmetric */
-void DrawCircleFourWaySymmetric(int x, int y, int xC, int yC)
-{
-	FrameBuffer::SetPixel(x + xC, y + yC, 0, 0, 0);
-	FrameBuffer::SetPixel(-x + xC, y + yC, 0, 0, 0);
-	FrameBuffer::SetPixel(x + xC, -y + yC, 0, 0, 0);
-	FrameBuffer::SetPixel(-x + xC, -y + yC, 0, 0, 0);
-}
 
-/* Midpoint Ellipse Drawing */
+/* DDA Triangle Drawing */
 void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 {
-	point2d_Float Top, Middle, Bottom;
-	bool MiddleIsLeft;
+	point2d_Float Top = { 0.f, 0.f }, Middle = { 0.f, 0.f}, Bottom = {0.f, 0.f};
+	bool middleIsLeft = NULL;
 
 	if (p0.y < p1.y)                    // case: 4, 5, 6
 	{
@@ -46,93 +38,95 @@ void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 			Top = p2;
 			Middle = p0;
 			Bottom = p1;
-			MiddleIsLeft = true;
+			middleIsLeft = true;
 		}
 		else if (p1.y < p2.y) {	// case: 5
 
 			Top = p0;
 			Middle = p1;
 			Bottom = p2;
-			MiddleIsLeft = true;
+			middleIsLeft = true;
 		}
 		else if (p1.y > p2.y) {	// case: 5
 
 			Top = p0;
 			Middle = p2;
 			Bottom = p1;
-			MiddleIsLeft = false;
+			middleIsLeft = false;
 		}
 	}
-	else if (p0.y < p1.y) {                    // case: 1, 2, 3
+	else {                    // case: 1, 2, 3
 		if (p2.y < p1.y) {		// case: 2
 			Top = p2;
 			Middle = p1;
 			Bottom = p0;
-			MiddleIsLeft = false;
+			middleIsLeft = false;
 		} else if (p0.y < p2.y) {	// case: 3
 			Top = p1;
 			Middle = p0;
 			Bottom = p2;
-			MiddleIsLeft = false;
+			middleIsLeft = false;
 		} else if (p0.y > p2.y) {	// case: 4
 			Top = p1;
-			Middle = p0;
-			Bottom = p2;
-			MiddleIsLeft = false;
+			Middle = p2;
+			Bottom = p0;
+			middleIsLeft = true;
 		}
 	}
 
+
+	float InverseSlope[3] = { 0.f, 0.f, 0.f };
 
 	float xLeft, xRight;
 	xLeft = xRight = Top.x;
-	float mLeft, mRight;
+	float leftEdge, rightEdge;
+	InverseSlope[0] = (Top.x - Bottom.x) / (Top.y - Bottom.y);
+	InverseSlope[1] = (Top.x - Middle.x) / (Top.y - Middle.y);
+	InverseSlope[2] = (Middle.x - Bottom.x) / (Middle.y - Bottom.y);
+
 	// Region 1
-	if (MiddleIsLeft)
+
+	for (int y = ceil(Top.y); y <= ceil(Middle.y) - 1; y++)
 	{
-		mLeft = (Top.x - Middle.x) / (Top.y - Middle.y);
-		mRight = (Top.x - Bottom.x) / (Top.y - Bottom.y);
-	}
-	else
-	{
-		mLeft = (Top.x - Bottom.x) / (Top.y - Bottom.y);
-		mRight = (Middle.x - Top.x) / (Middle.y - Top.y);
-	}
-	int finalY;
-	float Tleft, Tright;
-	for (int y = ceil(Top.y); y <= (int)Middle.y - 1; y++)
-	{
-		Tleft = float(Top.y - y) / (Top.y - Middle.y);
-		Tright = float(Top.y - y) / (Top.y - Bottom.y);
+		if (middleIsLeft)
+		{
+			leftEdge = InverseSlope[1];
+			rightEdge = InverseSlope[0];
+		}
+		else
+		{
+			leftEdge = InverseSlope[0];
+			rightEdge = InverseSlope[1];
+		}
+
 		for (int x = ceil(xLeft); x <= ceil(xRight) - 1; x++)
 		{
 			FrameBuffer::SetPixel(x, y, 0, 0, 0);
 
 		}
-		xLeft += mLeft;
-		xRight += mRight;
-		finalY = y;
+		xLeft += leftEdge;
+		xRight += rightEdge;
 	}
 
 	// Region 2 
-	if (MiddleIsLeft)
-	{
-		mLeft = (Bottom.x - Middle.x) / (Bottom.y - Middle.y);
-	}
-	else
-	{
-		mRight = (Middle.x - Bottom.x) / (Middle.y - Bottom.y);
-	}
 
-	for (int y = Middle.y; y <= ceil(Bottom.y) - 1; y++)
+
+	for (int y = ceil(Middle.y); y <= ceil(Bottom.y) - 1; y++)
 	{
-		Tleft = float(Bottom.y - y) / (Bottom.y - Middle.y);
-		Tright = float(Top.y - y) / (Top.y - Bottom.y);
+		if (middleIsLeft)
+		{
+			leftEdge = InverseSlope[2];
+		}
+		else
+		{
+			rightEdge = InverseSlope[2];
+		}
 		for (int x = ceil(xLeft); x <= ceil(xRight) - 1; x++)
 		{
 			FrameBuffer::SetPixel(x, y, 0, 0, 0);
 		}
-		xLeft += mLeft;
-		xRight += mRight;
+		xLeft += leftEdge;
+		xRight += rightEdge;
 
 	}
 
