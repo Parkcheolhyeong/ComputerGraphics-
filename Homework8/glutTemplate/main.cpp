@@ -19,7 +19,6 @@ struct point2d_Float {
 };
 
 
-Color Black = { 0, 0, 0 };
 int winID;	// window's name
 int counter = 0;
 point2d_Float rVertices[3] = { {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f} }; // Three Point of vertice, x, y
@@ -29,6 +28,9 @@ point2d_Float rVertices[3] = { {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f} }; // Three Po
 void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 {
 	point2d_Float Top = { 0.f, 0.f }, Middle = { 0.f, 0.f}, Bottom = {0.f, 0.f};
+	float InverseSlope[3] = { 0.f, 0.f, 0.f }; // Inverse Value of Gradient
+	float xLeft, xRight;	// Value of Start, End
+	float leftEdge = 0.f, rightEdge = 0.f; // Indicated of InverseSlope
 	bool middleIsLeft = NULL;
 
 	if (p0.y < p1.y)                    // case: 4, 5, 6
@@ -66,7 +68,7 @@ void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 			Middle = p0;
 			Bottom = p2;
 			middleIsLeft = false;
-		} else if (p0.y > p2.y) {	// case: 4
+		} else if (p0.y > p2.y) {	// case: 1
 			Top = p1;
 			Middle = p2;
 			Bottom = p0;
@@ -75,11 +77,9 @@ void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 	}
 
 
-	float InverseSlope[3] = { 0.f, 0.f, 0.f };
 
-	float xLeft, xRight;
+	/* Init for Triangle */
 	xLeft = xRight = Top.x;
-	float leftEdge, rightEdge;
 	InverseSlope[0] = (Top.x - Bottom.x) / (Top.y - Bottom.y);
 	InverseSlope[1] = (Top.x - Middle.x) / (Top.y - Middle.y);
 	InverseSlope[2] = (Middle.x - Bottom.x) / (Middle.y - Bottom.y);
@@ -104,7 +104,8 @@ void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 			FrameBuffer::SetPixel(x, y, 0, 0, 0);
 
 		}
-		xLeft += leftEdge;
+		/* DDA Algorithm */
+		xLeft += leftEdge; 
 		xRight += rightEdge;
 	}
 
@@ -125,6 +126,8 @@ void DrawTriangle(point2d_Float p0, point2d_Float p1, point2d_Float p2)
 		{
 			FrameBuffer::SetPixel(x, y, 0, 0, 0);
 		}
+
+		/* DDA Algorithm */
 		xLeft += leftEdge;
 		xRight += rightEdge;
 
