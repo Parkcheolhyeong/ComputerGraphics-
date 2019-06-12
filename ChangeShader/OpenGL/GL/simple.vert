@@ -7,6 +7,6 @@ out vec3 f_color;
 
 void main(void)
 {  
-   gl_Position = coord3d;  
+   gl_Position =  coord3d;  
    f_color = v_color;  
 }
